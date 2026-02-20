@@ -1,4 +1,3 @@
-// src/main/java/com/example/demo/config/SecurityConfig.java
 package com.example.demo.config;
 
 import org.springframework.beans.factory.annotation.Autowired;
@@ -18,7 +17,6 @@ import org.springframework.web.cors.CorsConfigurationSource;
 import org.springframework.web.cors.UrlBasedCorsConfigurationSource;
 
 import java.util.Arrays;
-import java.util.List;
 
 @Configuration
 @EnableWebSecurity
@@ -30,61 +28,51 @@ public class SecurityConfig {
     @Bean
     public SecurityFilterChain filterChain(HttpSecurity http) throws Exception {
         http
-            .cors(Customizer.withDefaults()) // Spring ativa o CORS usando o bean corsConfigurationSource abaixo
+            .cors(Customizer.withDefaults())
             .csrf(csrf -> csrf.disable())
             .sessionManagement(session -> session
                 .sessionCreationPolicy(SessionCreationPolicy.STATELESS))
             .authorizeHttpRequests(auth -> auth
-                // Liberação obrigatória do Preflight (OPTIONS)
                 .requestMatchers(HttpMethod.OPTIONS, "/**").permitAll()
-
-                // Endpoints de Autenticação e Públicos
                 .requestMatchers("/api/auth/**").permitAll()
                 .requestMatchers("/api/public/**").permitAll()
-
-                // Acesso público para leituras específicas se necessário
                 .requestMatchers(HttpMethod.GET,
                     "/api/clergy/popes",
                     "/api/clergy/bishops",
                     "/api/clergy/stats"
                 ).permitAll()
-
-                // Qualquer outra rota exige o token JWT válido
                 .anyRequest().authenticated()
             );
 
-        // Adiciona o filtro JWT para processar o header de Authorization
         http.addFilterBefore(jwtAuthFilter, UsernamePasswordAuthenticationFilter.class);
-
         return http.build();
     }
 
     @Bean
     public CorsConfigurationSource corsConfigurationSource() {
         CorsConfiguration configuration = new CorsConfiguration();
-        
-        // ✅ A mágica está aqui: permitindo Vercel e Localhost
-        configuration.setAllowedOrigins(Arrays.asList(
+
+        // ✅ setAllowedOriginPatterns é compatível com allowCredentials = true
+        // setAllowedOrigins("*") + allowCredentials(true) é inválido pelo padrão CORS
+        configuration.setAllowedOriginPatterns(Arrays.asList(
             "https://apostolic-chain.vercel.app",
-            "http://localhost:5173"
+            "https://apostolic-chain-*.vercel.app", // preview deploys
+            "http://localhost:*"
         ));
-        
-        // Métodos HTTP permitidos
-        configuration.setAllowedMethods(Arrays.asList("GET", "POST", "PUT", "DELETE", "OPTIONS"));
-        
-        // Headers permitidos (incluindo o que o seu interceptor de API envia)
+
+        configuration.setAllowedMethods(Arrays.asList(
+            "GET", "POST", "PUT", "DELETE", "OPTIONS"
+        ));
+
         configuration.setAllowedHeaders(Arrays.asList(
-            "Authorization", 
-            "Content-Type", 
-            "X-Requested-With", 
-            "Accept", 
+            "Authorization",
+            "Content-Type",
+            "X-Requested-With",
+            "Accept",
             "Origin"
         ));
-        
-        // Permite o envio de cookies/auth headers se necessário
+
         configuration.setAllowCredentials(true);
-        
-        // Cache da resposta do Preflight (reduz requisições OPTIONS desnecessárias)
         configuration.setMaxAge(3600L);
 
         UrlBasedCorsConfigurationSource source = new UrlBasedCorsConfigurationSource();
