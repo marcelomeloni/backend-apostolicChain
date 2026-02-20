@@ -10,7 +10,7 @@ import org.springframework.web.bind.annotation.*;
 
 @RestController
 @RequestMapping("/api/public/stats")
-@CrossOrigin(origins = "*")
+
 public class PublicStatsController {
 
     @Autowired
@@ -43,4 +43,5 @@ public class PublicStatsController {
 
         return ResponseEntity.ok(stats);
     }
+
 }
