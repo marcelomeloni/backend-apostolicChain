@@ -52,11 +52,9 @@ public class SecurityConfig {
     public CorsConfigurationSource corsConfigurationSource() {
         CorsConfiguration configuration = new CorsConfiguration();
 
-        // ✅ setAllowedOriginPatterns é compatível com allowCredentials = true
-        // setAllowedOrigins("*") + allowCredentials(true) é inválido pelo padrão CORS
         configuration.setAllowedOriginPatterns(Arrays.asList(
             "https://apostolic-chain.vercel.app",
-            "https://apostolic-chain-*.vercel.app", // preview deploys
+            "https://apostolic-chain-*.vercel.app",
             "http://localhost:*"
         ));
 
@@ -85,3 +83,4 @@ public class SecurityConfig {
         return new BCryptPasswordEncoder();
     }
 }
+
