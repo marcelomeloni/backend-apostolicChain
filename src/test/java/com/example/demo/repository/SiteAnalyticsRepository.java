@@ -24,7 +24,7 @@ public interface SiteAnalyticsRepository extends JpaRepository<SiteAnalytics, Lo
         """, nativeQuery = true)
     void upsertView(@Param("hash") String hash);
 
-    // MÁGICA AQUI: JPQL faz o cast automático para Long, evitando Erro 500
     @Query("SELECT COALESCE(SUM(s.viewsCount), 0L) FROM SiteAnalytics s")
     Long sumAllViews();
+
 }
