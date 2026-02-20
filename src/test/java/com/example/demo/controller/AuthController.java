@@ -15,7 +15,7 @@ import java.util.Optional;
 
 @RestController
 @RequestMapping("/api/auth")
-@CrossOrigin(origins = "*") // Permite que o seu React local consiga chamar essa API
+
 public class AuthController {
 
     @Autowired
@@ -56,4 +56,5 @@ public class AuthController {
         // Senha errada ou e-mail não encontrado
         return ResponseEntity.status(401).body("{\"success\": false, \"message\": \"Credenciais inválidas\"}");
     }
+
 }
