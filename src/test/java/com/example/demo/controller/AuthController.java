@@ -25,11 +25,8 @@ public class AuthController {
     private PasswordEncoder passwordEncoder;
 
     @Autowired
-    private JwtUtil jwtUtil; // Injetando o nosso gerador de JWT
-
-    // ==========================================
-    // ROTA DE LOGIN (Usada pelo React)
-    // ==========================================
+    private JwtUtil jwtUtil; 
+    
     @PostMapping("/login")
     public ResponseEntity<?> login(@RequestBody LoginDTO request) {
         Optional<Admin> adminOptional = adminRepository.findByEmail(request.getEmail());
@@ -40,7 +37,7 @@ public class AuthController {
             // Compara a senha crua com a hash do banco:
             if (passwordEncoder.matches(request.getPassword(), admin.getPasswordHash())) {
                 
-                // MÁGICA AQUI: Gera o token JWT
+                // Gera o token JWT
                 String token = jwtUtil.generateToken(admin.getEmail());
 
                 // Monta a resposta em JSON com o token
@@ -58,3 +55,4 @@ public class AuthController {
     }
 
 }
+
