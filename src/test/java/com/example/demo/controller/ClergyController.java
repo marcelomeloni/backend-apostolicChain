@@ -14,29 +14,29 @@ import org.springframework.web.bind.annotation.*;
 
 @RestController
 @RequestMapping("/api/clergy")
-@CrossOrigin(origins = "*")
+// ✅ @CrossOrigin removido — CORS centralizado no SecurityConfig
 public class ClergyController {
 
     @Autowired
     private ClergyService clergyService;
 
     @GetMapping("/popes")
-public ResponseEntity<Page<Clergy>> getPopes(
-    @RequestParam(defaultValue = "0") int page,
-    @RequestParam(defaultValue = "20") int size) {
-    return ResponseEntity.ok(
-        clergyService.findByRole("POPE", PageRequest.of(page, size, Sort.by("papacy_start_date")))
-    );
-}
+    public ResponseEntity<Page<Clergy>> getPopes(
+            @RequestParam(defaultValue = "0") int page,
+            @RequestParam(defaultValue = "20") int size) {
+        return ResponseEntity.ok(
+            clergyService.findByRole("POPE", PageRequest.of(page, size, Sort.by("papacy_start_date")))
+        );
+    }
 
-@GetMapping("/bishops")
-public ResponseEntity<Page<Clergy>> getBishops(
-    @RequestParam(defaultValue = "0") int page,
-    @RequestParam(defaultValue = "30") int size) {
-    return ResponseEntity.ok(
-        clergyService.findByRole("BISHOP", PageRequest.of(page, size, Sort.by("start_date")))
-    );
-}
+    @GetMapping("/bishops")
+    public ResponseEntity<Page<Clergy>> getBishops(
+            @RequestParam(defaultValue = "0") int page,
+            @RequestParam(defaultValue = "30") int size) {
+        return ResponseEntity.ok(
+            clergyService.findByRole("BISHOP", PageRequest.of(page, size, Sort.by("start_date")))
+        );
+    }
 
     @PostMapping
     public ResponseEntity<?> registerClergy(@RequestBody ClergyDTO request) {
