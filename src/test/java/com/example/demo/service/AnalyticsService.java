@@ -17,7 +17,7 @@ public class AnalyticsService {
     @Autowired
     private DailyVisitRepository dailyVisitRepository;
 
-    // ✅ Async — não bloqueia a resposta da API
+
     @Async
     @Transactional
     public void recordView(String entityHash) {
@@ -28,4 +28,5 @@ public class AnalyticsService {
             System.err.println("Analytics error: " + e.getMessage());
         }
     }
+
 }
