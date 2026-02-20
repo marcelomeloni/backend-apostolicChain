@@ -14,7 +14,7 @@ import org.springframework.web.bind.annotation.*;
 
 @RestController
 @RequestMapping("/api/clergy")
-// ✅ @CrossOrigin removido — CORS centralizado no SecurityConfig
+
 public class ClergyController {
 
     @Autowired
@@ -63,3 +63,4 @@ public class ClergyController {
         return ResponseEntity.ok(clergyService.getDashboardStats());
     }
 }
+
