@@ -26,7 +26,7 @@ public class PublicClergyController {
         return ResponseEntity.ok(publicClergyService.searchByName(name));
     }
 
-    // ✅ Returns full ancestor chain from given hash up to root
+
     @GetMapping("/trace/{hash}")
     public ResponseEntity<List<Clergy>> traceLineage(@PathVariable String hash) {
         List<Clergy> lineage = publicClergyService.getTracePath(hash);
@@ -34,7 +34,7 @@ public class PublicClergyController {
         return ResponseEntity.ok(lineage);
     }
 
-    // ✅ Fetch a single node (used by frontend lazy-loader when parent not in graph)
+
     @GetMapping("/node/{hash}")
     public ResponseEntity<List<Clergy>> getNode(@PathVariable String hash) {
         List<Clergy> result = publicClergyService.getByHash(hash);
@@ -42,4 +42,5 @@ public class PublicClergyController {
         return ResponseEntity.ok(result);
     }
     
+
 }
