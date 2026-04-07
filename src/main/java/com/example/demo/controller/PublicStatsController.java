@@ -26,19 +26,18 @@ public class PublicStatsController {
     public ResponseEntity<PublicStatsDTO> getPublicStats() {
         PublicStatsDTO stats = new PublicStatsDTO();
 
-        // 1. Contagens básicas
         long bishops = clergyRepository.countBishops();
         long popes   = clergyRepository.countPopes();
         stats.setTotalBishops(bishops);
         stats.setTotalPopes(popes);
         stats.setTotalClergy(bishops + popes);
 
-        // 2. Estatísticas de acesso
+       
         stats.setTotalViews(siteAnalyticsRepository.sumAllViews());
         Long today = dailyVisitRepository.findTodayViews();
         stats.setTodayViews(today != null ? today : 0L);
 
-        // 3. Os 6 Papas Recentes (Otimizado via Banco de Dados)
+      
         stats.setRecentPopes(clergyRepository.findTop6RecentPopes());
 
         return ResponseEntity.ok(stats);
