@@ -12,7 +12,5 @@ public class ClergyDTO {
     private Role role;
     private LocalDate startDate;
     private LocalDate papacyStartDate;
-    
-    // NOTA: Em um cenário real, você também precisaria receber a "assinatura" 
-    // ou a transação já assinada pelo admin no frontend para submeter à rede.
+
 }
