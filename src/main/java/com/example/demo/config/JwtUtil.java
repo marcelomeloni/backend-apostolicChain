@@ -11,13 +11,13 @@ import java.util.Date;
 @Component
 public class JwtUtil {
 
-    // Chave secreta gerada automaticamente para o algoritmo HS256
+   
     private static final Key SECRET_KEY = Keys.secretKeyFor(SignatureAlgorithm.HS256);
     
-    // Tempo de expiração do Token (24 horas)
+   
     private static final long EXPIRATION_TIME = 86400000; 
 
-    // Método que cria o Token baseado no email do Admin
+ 
     public String generateToken(String email) {
         return Jwts.builder()
                 .setSubject(email)
@@ -27,7 +27,7 @@ public class JwtUtil {
                 .compact();
     }
 
-    // Método para extrair o e-mail (subject) do token
+ 
     public String extractEmail(String token) {
         return Jwts.parserBuilder()
                 .setSigningKey(SECRET_KEY)
@@ -37,7 +37,7 @@ public class JwtUtil {
                 .getSubject();
     }
 
-    // Método para validar se o token é autêntico e não expirou
+   
     public boolean validateToken(String token) {
         try {
             Jwts.parserBuilder()
@@ -46,7 +46,7 @@ public class JwtUtil {
                 .parseClaimsJws(token);
             return true;
         } catch (Exception e) {
-            // Token inválido, expirado ou assinatura corrompida
+          
             return false;
         }
     }
