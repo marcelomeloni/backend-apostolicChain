@@ -17,7 +17,6 @@ public class AnalyticsService {
     @Autowired
     private DailyVisitRepository dailyVisitRepository;
 
-    // ✅ Async — não bloqueia a resposta da API
     @Async
     @Transactional
     public void recordView(String entityHash) {
