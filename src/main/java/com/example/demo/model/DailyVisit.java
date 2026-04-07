@@ -21,7 +21,7 @@ public class DailyVisit {
     @Column(name = "unique_visitors")
     private Long uniqueVisitors = 0L;
 
-    // getters/setters
+
     public Long getId() { return id; }
     public LocalDate getVisitDate() { return visitDate; }
     public void setVisitDate(LocalDate visitDate) { this.visitDate = visitDate; }
