@@ -21,7 +21,7 @@ public class SiteAnalytics {
     @Column(name = "last_viewed_at")
     private LocalDateTime lastViewedAt;
 
-    // getters/setters
+
     public Long getId() { return id; }
     public String getEntityHash() { return entityHash; }
     public void setEntityHash(String entityHash) { this.entityHash = entityHash; }
