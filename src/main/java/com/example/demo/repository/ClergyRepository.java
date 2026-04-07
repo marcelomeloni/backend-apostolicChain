@@ -22,7 +22,6 @@ public interface ClergyRepository extends JpaRepository<Clergy, String> {
     )
     Page<Clergy> findByRole(@Param("role") String role, Pageable pageable);
 
-    // 👇 SOLUÇÃO INFALÍVEL: SQL direto e sem parâmetros de Enum!
     @Query(value = "SELECT count(*) FROM clergy WHERE role = 'BISHOP'", nativeQuery = true)
     long countBishops();
 
