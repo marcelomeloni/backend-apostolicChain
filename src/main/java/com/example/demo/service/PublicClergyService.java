@@ -24,14 +24,14 @@ public class PublicClergyService {
     public List<Clergy> searchByName(String term) {
         if (term == null || term.trim().isEmpty()) return List.of();
         List<Clergy> results = publicClergyRepository.searchByNameLimit10(term.trim());
-        // ✅ Registra view para cada resultado da busca
+
         results.forEach(c -> analyticsService.recordView(c.getHash()));
         return results;
     }
 
     public List<Clergy> getTracePath(String hash) {
         List<Clergy> lineage = publicClergyRepository.traceLineageToRoot(hash);
-        // ✅ Registra view do nó raiz da busca
+
         if (!lineage.isEmpty()) analyticsService.recordView(hash);
         return lineage;
     }
