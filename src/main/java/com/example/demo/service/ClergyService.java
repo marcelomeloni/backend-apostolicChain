@@ -45,10 +45,6 @@ public class ClergyService {
 
     private static final String JESUS_DETERMINISTIC_INPUT = "GOD_Jesus Cristo_ROOT_1970-01-01";
 
-    // -------------------------------------------------------------------------
-    // PÚBLICOS
-    // -------------------------------------------------------------------------
-
     public List<Clergy> getPopes() {
         return clergyRepository.findByRole(Clergy.Role.POPE.name());
     }
@@ -60,8 +56,7 @@ public class ClergyService {
     public DashboardStatsDTO getDashboardStats() {
         DashboardStatsDTO stats = new DashboardStatsDTO();
         stats.setInitialized(checkIfInitializedOnChain());
-        
-        // 👇 Substitua o countByRole por isto:
+
         stats.setTotalBishops(clergyRepository.countBishops());
         stats.setTotalPopes(clergyRepository.countPopes());
         
@@ -69,21 +64,15 @@ public class ClergyService {
         return stats;
     }
 
-    // -------------------------------------------------------------------------
-    // CHECK GENESIS ON-CHAIN
-    // Usa hashToSeedBytes (raw [u8;32]) porque initialize_genesis.rs
-    // declara: seeds = [b"clergy", jesus_hash.as_ref()]  ← bytes fixos
-    // -------------------------------------------------------------------------
     private boolean checkIfInitializedOnChain() {
         try {
             String jesusHash = generateHashRaw(JESUS_DETERMINISTIC_INPUT);
             PublicKey programId = new PublicKey(programIdString);
 
-            // SEED = bytes raw do hash (sem prefixo "0x"), 32 bytes
             PublicKey pdaJesus = PublicKey.findProgramAddress(
                     Arrays.asList(
                         "clergy".getBytes(StandardCharsets.UTF_8),
-                        hashToSeedBytes(jesusHash)   // [u8; 32]
+                        hashToSeedBytes(jesusHash)   
                     ),
                     programId
             ).getAddress();
@@ -104,11 +93,6 @@ public class ClergyService {
         }
     }
 
-    // -------------------------------------------------------------------------
-    // CREATE CLERGY
-    // create_clergy.rs usa: seeds = [b"clergy", hash.as_bytes()]
-    // ou seja, seed = bytes UTF-8 da String "0x<64hex>" — NÃO raw bytes
-    // -------------------------------------------------------------------------
     @Transactional
     public Clergy createClergy(ClergyDTO dto) throws Exception {
         String deterministicHash = generateDeterministicHash(dto);
@@ -123,7 +107,6 @@ public class ClergyService {
             throw new RuntimeException("Falha ao assinar e enviar transação na Solana.");
         }
 
-        // Aguarda confirmação antes de salvar no banco
         waitForConfirmation(txSignature);
 
         Clergy newClergy = new Clergy();
@@ -137,11 +120,6 @@ public class ClergyService {
         return clergyRepository.save(newClergy);
     }
 
-    // -------------------------------------------------------------------------
-    // INITIALIZE GENESIS
-    // initialize_genesis.rs usa: seeds = [b"clergy", jesus_hash.as_ref()]
-    // jesus_hash é [u8; 32] — raw bytes do SHA-256
-    // -------------------------------------------------------------------------
     @Transactional
     public void initializeGenesis(GenesisDTO dto) throws Exception {
         System.out.println("=== INICIO GENESIS ===");
@@ -157,7 +135,6 @@ public class ClergyService {
 
         PublicKey programId = new PublicKey(programIdString);
 
-        // PDA derivado com raw bytes [u8;32] — igual ao Rust
         byte[] jesusHashBytes = hashToSeedBytes(jesusHash);
         byte[] peterHashBytes = hashToSeedBytes(peterHash);
 
@@ -181,7 +158,6 @@ public class ClergyService {
         System.out.println("PDA Peter: " + pdaPeter.toBase58());
         System.out.println("Admin Wallet: " + adminWallet.getPublicKey().toBase58());
 
-        // Contas na ordem exata do Rust: jesus, peter, user, system_program
         List<AccountMeta> keys = new ArrayList<>();
         keys.add(new AccountMeta(pdaJesus, false, true));
         keys.add(new AccountMeta(pdaPeter, false, true));
@@ -200,15 +176,14 @@ public class ClergyService {
                 + " (" + dto.getPeterName().getBytes(StandardCharsets.UTF_8).length + " bytes)");
         System.out.println("Peter start_date (epochDay): " + peterStartDateEpochDay);
 
-        // Serialização Borsh / Anchor (little-endian)
         ByteBuffer buffer = ByteBuffer.allocate(512);
         buffer.order(ByteOrder.LITTLE_ENDIAN);
 
-        buffer.put(discriminator);                   // [u8; 8]
-        buffer.put(jesusHashBytes);                  // [u8; 32]
-        buffer.put(peterHashBytes);                  // [u8; 32]
-        putAnchorString(buffer, dto.getPeterName()); // Borsh String: u32_len + utf8
-        buffer.putLong(peterStartDateEpochDay);      // i64
+        buffer.put(discriminator);                 
+        buffer.put(jesusHashBytes);                 
+        buffer.put(peterHashBytes);               
+        putAnchorString(buffer, dto.getPeterName());
+        buffer.putLong(peterStartDateEpochDay);   
 
         byte[] instructionData = Arrays.copyOf(buffer.array(), buffer.position());
 
@@ -237,7 +212,6 @@ public class ClergyService {
             throw new RuntimeException("Falha na transação Genesis - signature nula.");
         }
 
-        // Aguarda confirmação real antes de salvar no banco
         waitForConfirmation(txSignature);
 
         System.out.println("=== SALVANDO NO BANCO ===");
@@ -264,18 +238,6 @@ public class ClergyService {
         System.out.println("=== GENESIS COMPLETO ===");
     }
 
-    // -------------------------------------------------------------------------
-    // MÉTODOS AUXILIARES
-    // -------------------------------------------------------------------------
-
-    /**
-     * Aguarda confirmação on-chain da transação (polling até 60s).
-     * Lança RuntimeException se a TX falhar ou não confirmar no tempo limite.
-     */
-   /**
- * Aguarda confirmação on-chain da transação (polling até 60s).
- * Lança RuntimeException se a TX falhar ou não confirmar no tempo limite.
- */
 private void waitForConfirmation(String txSignature) throws Exception {
     System.out.println("=== AGUARDANDO CONFIRMAÇÃO DA SOLANA...");
     for (int i = 0; i < 30; i++) {
@@ -335,10 +297,6 @@ private void waitForConfirmation(String txSignature) throws Exception {
         }
     }
 
-    /**
-     * Converte hash "0x<hex64>" para [u8; 32].
-     * Usado como seed no initialize_genesis (Rust recebe [u8;32]).
-     */
     private byte[] hashToSeedBytes(String hash) {
         String hex = hash.startsWith("0x") ? hash.substring(2) : hash;
         return hexStringToBytes(hex);
@@ -362,27 +320,22 @@ private void waitForConfirmation(String txSignature) throws Exception {
         return sb.toString();
     }
 
-    /** Borsh String: u32 (little-endian) com tamanho + bytes UTF-8 */
+ 
     private void putAnchorString(ByteBuffer buffer, String val) {
         byte[] bytes = val.getBytes(StandardCharsets.UTF_8);
         buffer.putInt(bytes.length);
         buffer.put(bytes);
     }
 
-    // -------------------------------------------------------------------------
-    // SEND TRANSACTION — create_clergy
-    // Rust: seeds = [b"clergy", hash.as_bytes()]
-    // Java: seed = dto.getHash().getBytes(UTF_8)  ← String "0x<hex64>"
-    // -------------------------------------------------------------------------
     private String sendTransactionToSolana(ClergyDTO dto) {
         try {
             PublicKey programId = new PublicKey(programIdString);
 
-            // SEED = bytes UTF-8 da String hash — igual ao hash.as_bytes() do Rust
+        
             PublicKey pda = PublicKey.findProgramAddress(
                     Arrays.asList(
                         "clergy".getBytes(StandardCharsets.UTF_8),
-                        dto.getHash().getBytes(StandardCharsets.UTF_8)  // ← corrigido
+                        dto.getHash().getBytes(StandardCharsets.UTF_8)  
                     ),
                     programId
             ).getAddress();
@@ -421,7 +374,7 @@ private void waitForConfirmation(String txSignature) throws Exception {
         ByteBuffer buffer = ByteBuffer.allocate(512);
         buffer.order(ByteOrder.LITTLE_ENDIAN);
 
-        // Discriminator fixo para "create_clergy" — gere via AnchorDiscriminator se preferir
+       
         buffer.put(new byte[]{
             (byte) 152, (byte) 46, (byte) 13, (byte) 116,
             (byte) 75, (byte) 132, (byte) 64, (byte) 118
@@ -430,8 +383,8 @@ private void waitForConfirmation(String txSignature) throws Exception {
         putAnchorString(buffer, dto.getHash());
         putAnchorString(buffer, dto.getParentHash() != null ? dto.getParentHash() : "");
         putAnchorString(buffer, dto.getName());
-        buffer.put((byte) dto.getRole().ordinal());      // enum: Bishop=0, Pope=1, Root=2
-        buffer.putLong(dto.getStartDate().toEpochDay()); // i64
+        buffer.put((byte) dto.getRole().ordinal());     
+        buffer.putLong(dto.getStartDate().toEpochDay()); 
 
         if (dto.getPapacyStartDate() != null) {
             buffer.put((byte) 1);
