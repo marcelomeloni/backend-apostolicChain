@@ -52,7 +52,7 @@ public class SecurityConfig {
     public CorsConfigurationSource corsConfigurationSource() {
         CorsConfiguration configuration = new CorsConfiguration();
 
-        // ✅ setAllowedOriginPatterns compatível com allowCredentials = true
+      
         configuration.setAllowedOriginPatterns(Arrays.asList(
             "https://apostolic-chain.vercel.app",
             "https://apostolic-chain-*.vercel.app",
